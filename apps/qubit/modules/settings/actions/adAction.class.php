@@ -17,14 +17,13 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsadAction extends DefaultEditAction
+class SettingsADAction extends DefaultEditAction
 {
   // Arrays not allowed in class constants
   public static
     $NAMES = array(
       'ldapHost',
-      'ldapBaseDn',
-      'ldapBindAttribute');
+      'ldapBaseDn');
 
   protected function earlyExecute()
   {
@@ -35,7 +34,6 @@ class SettingsadAction extends DefaultEditAction
   {
     switch ($name)
     {
-
       case 'ldapHost':
       case 'ldapBaseDn':
         // Determine and set field default value
@@ -45,17 +43,12 @@ class SettingsadAction extends DefaultEditAction
         }
         else
         {
-
           $default = (isset($defaults[$name])) ? $defaults[$name] : '';
         }
 
         $this->form->setDefault($name, $default);
-
         // Set validator and widget
-        //$validator = ($name == 'ldapPort') ? new sfValidatorInteger(array('min' => 1, 'max' => 65535)) : new sfValidatorPass;
-        //$this->form->setValidator($name, $validator);
         $this->form->setWidget($name, new sfWidgetFormInput);
-
         break;
     }
   }
@@ -64,36 +57,31 @@ class SettingsadAction extends DefaultEditAction
   {
     switch ($name = $field->getName())
     {
-		case 'ldapHost':
+      case 'ldapHost':
       case 'ldapBaseDn':
-        if (null === $this->{$name})
-        {
-          $this->{$name} = new QubitSetting;
-          $this->{$name}->name = $name;
-          $this->{$name}->scope = 'ad';
-        }
-        $this->{$name}->setValue($field->getValue(), array('sourceCulture' => true));
-        $this->{$name}->save();
-
-        break;
+      if (null === $this->{$name})
+      {
+        $this->{$name} = new QubitSetting;
+        $this->{$name}->name = $name;
+        $this->{$name}->scope = 'ActiveDirectory';
+      }
+      $this->{$name}->setValue($field->getValue(), array('sourceCulture' => true));
+      $this->{$name}->save();
+      break;
     }
   }
 
   public function execute($request)
   {
     parent::execute($request);
-
     if ($request->isMethod('post'))
     {
       $this->form->bind($request->getPostParameters());
-
       if ($this->form->isValid())
       {
         $this->processForm();
-
         QubitCache::getInstance()->removePattern('settings:i18n:*');
-
-        $this->redirect(array('module' => 'settings', 'action' => 'ad'));
+        $this->redirect(array('module' => 'settings', 'action' => 'ActiveDirectory'));
       }
     }
   }
