@@ -19,7 +19,7 @@
 
 include sfConfig::get('sf_root_dir') .'/vendor/password_compat/password.php';
 
-class adUser extends myUser implements Zend_Acl_Role_Interface
+class ADUser extends myUser implements Zend_Acl_Role_Interface
 {
   protected $ldapConnection;
   protected $ldapBound;
@@ -31,7 +31,7 @@ class adUser extends myUser implements Zend_Acl_Role_Interface
 
     if (!extension_loaded('ldap'))
     {
-      throw new sfConfigurationException('ldapUser class needs the "ldap" extension to be loaded.');
+      throw new sfConfigurationException('ADUser class needs the "ldap" extension to be loaded.');
     }
   }
 
@@ -51,12 +51,10 @@ class adUser extends myUser implements Zend_Acl_Role_Interface
     }
 
     $authenticated = $this->ldapAuthenticate($username, $password);
-
     // Fallback to non-LDAP authentication if need be and load/create user data
     if (!$authenticated)
     {
       $authenticated = parent::authenticate($username, $password);
-
       // Load user
       $criteria = new Criteria;
       $criteria->add(QubitUser::EMAIL, $username);
@@ -93,14 +91,10 @@ class adUser extends myUser implements Zend_Acl_Role_Interface
   protected function createUserFromLdapInfo($username)
   {
     $user = new QubitUser();
-    //$user->username = $username;
-
     $conn = $this->getLdapConnection();
-    
     // Do AD search for user's email address
     $base_dn = (string)QubitSetting::getByName('ldapBaseDn');
     $filter='(&(objectCategory=person)(objectClass=user)(userPrincipalName='. $username .'))';
-	  
     $result = ldap_search($conn, $base_dn, $filter);
     $entries = ldap_get_entries($conn, $result);
     $noentries = ldap_count_entries($conn, $result);
@@ -110,14 +104,11 @@ class adUser extends myUser implements Zend_Acl_Role_Interface
     {
       //In order to relocate the user when logging in again, the email must match the UPN
       //which in some organisations will match the email address in any case.
-      //if (!empty($entries[0]['mail'])) $user->email = $entries[0]['mail'][0];
       $user->email = $username;
       $user->username = $entries[0]['name'][0];
     } else { $user->username = $username; }
 
     $user->save();
-
-
     return $user;
   }
 
@@ -129,18 +120,14 @@ class adUser extends myUser implements Zend_Acl_Role_Interface
     }
 
     $host = QubitSetting::getByName('ldapHost');
-    //$port = QubitSetting::getByName('ldapPort');
 
     if (null !== $host)
     {
-		
-			// If using an URI you only need to send the host URI, so the $port will be null
-			$connection = ldap_connect($host->getValue(array('sourceCulture' => true)));
-      		ldap_set_option($connection, LDAP_OPT_PROTOCOL_VERSION, 3);
-          
-      		$this->ldapConnection = $connection;
-      		return $connection;
-		//}
+      // If using an URI you only need to send the host URI, so the $port will be null
+      $connection = ldap_connect($host->getValue(array('sourceCulture' => true)));
+      ldap_set_option($connection, LDAP_OPT_PROTOCOL_VERSION, 3);
+      $this->ldapConnection = $connection;
+      return $connection;
     }
   }
 
