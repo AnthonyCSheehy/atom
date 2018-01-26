@@ -8,13 +8,13 @@
 
 <?php slot('title') ?>
 
-  <h1><?php echo __('Active Directory authentication') ?></h1>
+  <h1><?php echo __('Active Directory Authentication') ?></h1>
 
 <?php end_slot() ?>
 
 <?php slot('content') ?>
 
-  <?php echo $form->renderFormTag(url_for(array('module' => 'settings', 'action' => 'ad'))) ?>
+  <?php echo $form->renderFormTag(url_for(array('module' => 'settings', 'action' => 'ActiveDirectory'))) ?>
 
     <div id="content">
 
