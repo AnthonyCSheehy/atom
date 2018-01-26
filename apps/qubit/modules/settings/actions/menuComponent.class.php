@@ -92,11 +92,11 @@ class SettingsMenuComponent extends sfComponent
     }
 
     // Only show Active Directory authentication settings if Active Directory authentication's used
-    if ($this->context->user instanceof adUser)
+    if ($this->context->user instanceof ADUser)
     {
       array_push($this->nodes, array(
         'label' => $i18n->__('Active Directory Authentication'),
-        'action' => 'ad'
+        'action' => 'ActiveDirectory'
       ));
     }
 
